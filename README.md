@@ -1,7 +1,7 @@
 # wpip
 Public IP address monitor and notify service for Windows using Java Selenium WebDriver
 
-* Build JAR with dependancies using Maven  
+* Build JAR with dependencies using Maven  
   `C:\wpim>maven clean package`
 
 * __WebDriver executables not included__  
