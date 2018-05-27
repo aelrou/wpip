@@ -8,7 +8,7 @@ Public IP address monitor and notify utility for Windows using Java Selenium Web
   Find them at [SeleniumHQ](https://www.seleniumhq.org/download/)
 
 * Configure visible or headless driver in JSON config file  
-  `"RUNTIME_DRIVER":"ChromeHeadlessDriver"`
+  `"RUNTIME_DRIVER":"FirefoxHeadlessDriver"`
 
 * Configure IP check frequency using Windows Task Scheduler  
   `java -jar "C:\wpip\app.jar" "C:\wpip"`
