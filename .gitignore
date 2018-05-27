@@ -1,0 +1,4 @@
+target
+workspace.xml
+tasks.xml
+*.json
