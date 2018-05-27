@@ -2,7 +2,7 @@
 Public IP address monitor and notify service for Windows using Java Selenium WebDriver
 
 * Build JAR with dependencies using Maven  
-  `C:\wpim>maven clean package`
+  `C:\wpim>mvn clean package`
 
 * __WebDriver executables not included__  
   Find them at [SeleniumHQ](https://www.seleniumhq.org/download/)
