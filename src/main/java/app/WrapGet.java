@@ -14,7 +14,7 @@ public class WrapGet {
         driver.get("about:blank");
 
         JavascriptExecutor jsdriver = (JavascriptExecutor) driver;
-        jsdriver.executeScript("window.location.href='" + url + "'");
+        jsdriver.executeScript("window.location.href='"+ url +"'");
         System.out.println("Browse URL \""+ url +"\"");
 
         WebElement element = null;
@@ -25,7 +25,7 @@ public class WrapGet {
         }
 
         if (element == null) {
-            throw new CustomExceptPageTimeout("Unable to find " + locatorType + " \"" + locator + "\" after " + seconds +" sec at url \"" + url + "\"");
+            throw new CustomExceptPageTimeout("Unable to find "+ locatorType +" \""+ locator +"\" after "+ seconds +" sec at url \""+ url +"\"");
         }
 
         return element;

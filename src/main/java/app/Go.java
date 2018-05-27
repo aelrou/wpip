@@ -10,6 +10,8 @@ import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
 import com.machinepublishers.jbrowserdriver.Timezone;
 import com.machinepublishers.jbrowserdriver.UserAgent;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -20,6 +22,7 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
@@ -31,7 +34,7 @@ import org.openqa.selenium.safari.SafariDriver;
 
 public class Go {
 
-    public static void main(String[] args) throws CustomExceptLocatorType, CustomExceptPageTimeout, CustomExceptElementWait {
+    public static void main(String[] args) {
         if (args == null || args.length == 0) {
             System.out.println("Please specify the working directory where the JAR file is located.");
             System.out.println("Example: \"java.exe\" -jar \"app.jar\" \"C:\\Working\\Directory\"");
@@ -39,7 +42,7 @@ public class Go {
         }
 
         if (args.length != 1) {
-            System.out.println("Only 1 parameter allowed. Found " + args.length);
+            System.out.println("Only 1 parameter allowed. Found "+ args.length);
             System.exit(1);
         }
 
@@ -65,24 +68,28 @@ public class Go {
 
         switch (localRunConfig.RUNTIME_DRIVER) {
             case "ChromeDriver":
-                executable = workDir + "\\" + localBinConfig.CHROME_DRIVER;
+                executable = workDir +"\\"+ localBinConfig.CHROME_DRIVER;
                 System.setProperty("webdriver.chrome.driver", executable);
-                driver = new ChromeDriver();
+                ChromeOptions chromeVisibleOptions = new ChromeOptions();
+                chromeVisibleOptions.addArguments("--user-data-dir="+ localBinConfig.CHROME_PROFILE);
+                driver = new ChromeDriver(chromeVisibleOptions);
                 break;
             case "ChromeHeadlessDriver":
-                executable = workDir + "\\" + localBinConfig.CHROME_DRIVER;
+                executable = workDir +"\\"+ localBinConfig.CHROME_DRIVER;
                 System.setProperty("webdriver.chrome.driver", executable);
-                ChromeOptions chromeOptions = new ChromeOptions();
-                chromeOptions.addArguments("--headless --disable-gpu");
-                driver = new ChromeDriver(chromeOptions);
+                ChromeOptions chromeHeadlessOptions = new ChromeOptions();
+                chromeHeadlessOptions.addArguments("--user-data-dir="+ localBinConfig.CHROME_PROFILE);
+                chromeHeadlessOptions.addArguments("--headless");
+                chromeHeadlessOptions.addArguments("--disable-gpu");
+                driver = new ChromeDriver(chromeHeadlessOptions);
                 break;
             case "EdgeDriver":
-                executable = workDir + "\\" + localBinConfig.EDGE_DRIVER;
+                executable = workDir +"\\"+ localBinConfig.EDGE_DRIVER;
                 System.setProperty("webdriver.edge.driver", executable);
                 driver = new EdgeDriver();
                 break;
             case "FirefoxDriver":
-                executable = workDir + "\\" + localBinConfig.FIREFOX_DRIVER;
+                executable = workDir +"\\"+ localBinConfig.FIREFOX_DRIVER;
                 System.setProperty("webdriver.gecko.driver", executable);
                 FirefoxOptions firefoxVisibleOptions = new FirefoxOptions();
                 firefoxVisibleOptions.setProfile(new FirefoxProfile(new File(localBinConfig.FIREFOX_PROFILE)));
@@ -108,7 +115,7 @@ public class Go {
                 // Ensure that the 3 Registry patches have been installed.
                 // Ensure that the IEDriverServer.exe is in the PATH variable.
                 // Ensure that there is an exception in the Windows Firewall for IEDriverServer.exe
-                executable = workDir + "\\" + localBinConfig.IE_DRIVER;
+                executable = workDir +"\\"+ localBinConfig.IE_DRIVER;
                 System.setProperty("webdriver.ie.driver", executable);
                 driver = new InternetExplorerDriver();
                 break;
@@ -122,85 +129,91 @@ public class Go {
                 );
                 break;
             case "PhantomJSDriver":
-                executable = workDir + "\\" + localBinConfig.PHANTOMJS_DRIVER;
+                executable = workDir +"\\"+ localBinConfig.PHANTOMJS_DRIVER;
                 capabilities = new DesiredCapabilities();
                 capabilities.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, executable);
                 capabilities.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, new String[]{"--ignore-ssl-errors=true", "--ssl-protocol=any", "--web-security=false",});
                 driver = new PhantomJSDriver(capabilities);
                 break;
             case "OperaDriver":
-                executable = workDir + "\\" + localBinConfig.OPERA_DRIVER;
+                executable = workDir +"\\"+ localBinConfig.OPERA_DRIVER;
                 OperaOptions operaOptions = new OperaOptions();
                 operaOptions.setBinary(executable);
                 System.setProperty("webdriver.opera.driver", executable);
                 driver = new OperaDriver(operaOptions);
                 break;
             case "SafariDriver":
-                executable = workDir + "\\" + localBinConfig.SAFARI_DRIVER;
+                executable = workDir +"\\"+ localBinConfig.SAFARI_DRIVER;
                 System.setProperty("webdriver.safari.driver", executable);
                 driver = new SafariDriver();
                 break;
             default:
-                System.out.println("Unknown RUNTIME_DRIVER : " + localRunConfig.RUNTIME_DRIVER);
+                System.out.println("Unknown RUNTIME_DRIVER : "+ localRunConfig.RUNTIME_DRIVER);
                 System.exit(1);
                 break;
         }
 
-//        Dimension window = new Dimension(1280,1080);
-//        java.awt.Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-//        driver.manage().window().setSize(window);
-//        Point position = new Point(screen.width - window.width, -40);
-//        driver.manage().window().setPosition(position);
+        Dimension window = new Dimension(localRunConfig.BROWSER_WIDTH, localRunConfig.BROWSER_HEIGHT);
+        // This cannot be relied upon when using headless mode. Must specify the screen size in a config.
+        // java.awt.Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        driver.manage().window().setSize(window);
+        Point position = new Point(localRunConfig.SCREEN_WIDTH - window.width, -40);
+        driver.manage().window().setPosition(position);
 
-        String deviceName = null;
         String ipCheckUrl = null;
         String ipCheckXpath = null;
         String ipNotifyUrl = null;
-        String ipNotifyXpath = null;
+        String ipNotifyFormXpath = null;
         String ipNotifySubmitXpath = null;
         String ipNotifyConfirmXpath = null;
 
         switch (localRunConfig.RUNTIME_STAGE) {
             case "Development":
-                deviceName = localStageConfig.DEVICE_NAME;
                 ipCheckUrl = localStageConfig.IPCHECK_URL;
                 ipCheckXpath = localStageConfig.IPCHECK_XPATH_LOCATOR;
                 ipNotifyUrl = localStageConfig.IPNOTIFY_URL;
-                ipNotifyXpath = localStageConfig.IPNOTIFY_XPATH_LOCATOR;
+                ipNotifyFormXpath = localStageConfig.IPNOTIFY_FORM_XPATH_LOCATOR;
                 ipNotifySubmitXpath = localStageConfig.IPNOTIFY_SUBMIT_XPATH_LOCATOR;
                 ipNotifyConfirmXpath = localStageConfig.IPNOTIFY_CONFIRM_XPATH_LOCATOR;
                 break;
             case "Test":
-                deviceName = "";
                 ipCheckUrl = "";
                 ipCheckXpath = "";
                 ipNotifyUrl = "";
-                ipNotifyXpath = "";
+                ipNotifyFormXpath = "";
                 ipNotifySubmitXpath = "";
                 ipNotifyConfirmXpath = "";
                 break;
             case "PRODUCTION":
-                deviceName = "";
                 ipCheckUrl = "";
                 ipCheckXpath = "";
                 ipNotifyUrl = "";
-                ipNotifyXpath = "";
+                ipNotifyFormXpath = "";
                 ipNotifySubmitXpath = "";
                 ipNotifyConfirmXpath = "";
                 break;
             default:
-                System.out.println("Unknown RUNTIME_STAGE : " + localRunConfig.RUNTIME_STAGE);
+                System.out.println("Unknown RUNTIME_STAGE : "+ localRunConfig.RUNTIME_STAGE);
                 System.exit(1);
                 break;
         }
 
         LocalDateTime startClock = LocalDateTime.now();
+        String currentIp = "";
 
-        WrapGet.waitPage(driver, ipCheckUrl, Loc.XPATH, ipCheckXpath, 10);
+        try {
 
-        WebElement element;
-        element = WrapLocator.waitDisplay(driver, Loc.XPATH, ipCheckXpath, 10);
-        String currentIp = element.getText();
+            WrapGet.waitPage(driver, ipCheckUrl, Loc.XPATH, ipCheckXpath, 10);
+
+            WebElement googleReport;
+            googleReport = WrapLocator.waitDisplay(driver, Loc.XPATH, ipCheckXpath, 10);
+            currentIp = googleReport.getText();
+
+        } catch (CustomExceptLocatorType | CustomExceptPageTimeout | CustomExceptElementWait e) {
+            System.out.println("Failed to check public IP");
+            e.printStackTrace();
+            System.exit(1);
+        }
 
         if (currentIp.equals(localStatusCache.IP_CACHE)){
 
@@ -210,19 +223,36 @@ public class Go {
 
             System.out.println("The reported IP "+ currentIp +" is different from the cached IP "+ localStatusCache.IP_CACHE);
 
-            WrapGet.waitPage(driver, ipNotifyUrl, Loc.XPATH, ipNotifyXpath, 10);
+            try {
 
-            element = WrapLocator.waitClickable(driver, Loc.XPATH, ipNotifyXpath, 10);
-            element.clear();
-            element.sendKeys(deviceName);
+                WrapGet.waitPage(driver, ipNotifyUrl, Loc.XPATH, ipNotifyFormXpath, 10);
 
-            element = WrapLocator.waitClickable(driver, Loc.XPATH, ipNotifySubmitXpath, 10);
-            element.click();
+                WebElement nameForm;
+                nameForm = WrapLocator.waitClickable(driver, Loc.XPATH, ipNotifyFormXpath, 10);
+                Actions actionForm = new Actions(driver);
+                actionForm.moveToElement(nameForm).build().perform();
+                nameForm.clear();
+                nameForm.sendKeys(localRunConfig.DEVICE_NAME);
 
-            WrapLocator.waitDisplay(driver, Loc.XPATH, ipNotifyConfirmXpath, 10);
+                WebElement submitButton;
+                submitButton = WrapLocator.waitClickable(driver, Loc.XPATH, ipNotifySubmitXpath, 10);
+                Actions actionSubmit = new Actions(driver);
+                actionSubmit.moveToElement(submitButton).build().perform();
+                submitButton.click();
 
-            updateLocalStatusCache(localStatusCacheFile, currentIp);
+                WebElement confirmMessage;
+                confirmMessage = WrapLocator.waitDisplay(driver, Loc.XPATH, ipNotifyConfirmXpath, 10);
+                confirmMessage.getText();
+
+                updateLocalStatusCache(localStatusCacheFile, currentIp);
+
+            } catch (CustomExceptLocatorType | CustomExceptPageTimeout | CustomExceptElementWait e) {
+                System.out.println("Failed to send update notification");
+                e.printStackTrace();
+                System.exit(1);
+            }
         }
+
         driver.quit();
 
         LocalDateTime stopClock = LocalDateTime.now();
@@ -234,34 +264,34 @@ public class Go {
     static File findJarFile(String workDir, String fileName) {
         File filePath = null;
         try {
-            filePath = new File(workDir + "\\" + fileName).getCanonicalFile();
+            filePath = new File(workDir +"\\"+ fileName).getCanonicalFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         if (!filePath.exists()) {
-            System.out.println("Cannot find \"" + filePath.toString() + "\"");
+            System.out.println("Cannot find \""+ filePath.toString() +"\"");
             System.out.println("Please ensure that the working directory is correct");
             System.exit(1);
         }
-        System.out.println("Found JAR \"" + filePath.toString() + "\"");
+        System.out.println("Found JAR \""+ filePath.toString() +"\"");
         return filePath;
     }
 
     static File findLocalBinConfig(String workDir, String fileName) {
         File filePath = null;
         try {
-            filePath = new File(workDir + "\\" + fileName).getCanonicalFile();
+            filePath = new File(workDir +"\\"+ fileName).getCanonicalFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         if (!filePath.exists()) {
-            System.out.println("Cannot find \"" + filePath.toString() + "\"");
+            System.out.println("Cannot find \""+ filePath.toString() +"\"");
             createLocalBinConfig(filePath);
             System.exit(1);
         }
-        System.out.println("Found JSON \"" + filePath.toString() + "\"");
+        System.out.println("Found JSON \""+ filePath.toString() +"\"");
         return filePath;
     }
 
@@ -285,7 +315,7 @@ public class Go {
 
     static void createLocalBinConfig(File file) {
         try {
-//            System.out.println("Creating JSON template \"" + file.toString() + "\"");
+//            System.out.println("Creating JSON template \""+ file.toString() +"\"");
             System.out.println("Creating...");
             FileWriter writer = new FileWriter(file, false);
             BufferedWriter buffer = new BufferedWriter(writer);
@@ -293,7 +323,7 @@ public class Go {
             gson.toJson(new LocalBinConfig(true), buffer);
             buffer.flush();
             buffer.close();
-            System.out.println("Please examine \"" + file + "\" and update the relative paths as needed");
+            System.out.println("Please examine \""+ file +"\" and update the relative paths as needed");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -302,17 +332,17 @@ public class Go {
     static File findLocalRunConfig(String workDir, String fileName) {
         File filePath = null;
         try {
-            filePath = new File(workDir + "\\" + fileName).getCanonicalFile();
+            filePath = new File(workDir +"\\"+ fileName).getCanonicalFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         if (!filePath.exists()) {
-            System.out.println("Cannot find \"" + filePath.toString() + "\"");
+            System.out.println("Cannot find \""+ filePath.toString() +"\"");
             createLocalRunConfig(filePath);
             System.exit(1);
         }
-        System.out.println("Found JSON \"" + filePath.toString() + "\"");
+        System.out.println("Found JSON \""+ filePath.toString() +"\"");
         return filePath;
     }
 
@@ -336,7 +366,7 @@ public class Go {
 
     static void createLocalRunConfig(File file) {
         try {
-//            System.out.println("Creating JSON template \"" + file.toString() + "\"");
+//            System.out.println("Creating JSON template \""+ file.toString() +"\"");
             System.out.println("Creating...");
             FileWriter writer = new FileWriter(file, false);
             BufferedWriter buffer = new BufferedWriter(writer);
@@ -344,7 +374,7 @@ public class Go {
             gson.toJson(new LocalRunConfig(true), buffer);
             buffer.flush();
             buffer.close();
-            System.out.println("Please examine \"" + file + "\" and update the selected driver as needed");
+            System.out.println("Please examine \""+ file +"\" and update the selected driver as needed");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -353,17 +383,17 @@ public class Go {
     static File findLocalStageConfig(String workDir, String fileName) {
         File filePath = null;
         try {
-            filePath = new File(workDir + "\\" + fileName).getCanonicalFile();
+            filePath = new File(workDir +"\\"+ fileName).getCanonicalFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         if (!filePath.exists()) {
-            System.out.println("Cannot find \"" + filePath.toString() + "\"");
+            System.out.println("Cannot find \""+ filePath.toString() +"\"");
             createLocalStageConfig(filePath);
             System.exit(1);
         }
-        System.out.println("Found JSON \"" + filePath.toString() + "\"");
+        System.out.println("Found JSON \""+ filePath.toString() +"\"");
         return filePath;
     }
 
@@ -387,7 +417,7 @@ public class Go {
 
     static void createLocalStageConfig(File file) {
         try {
-//            System.out.println("Creating JSON template \"" + file.toString() + "\"");
+//            System.out.println("Creating JSON template \""+ file.toString() +"\"");
             System.out.println("Creating...");
             FileWriter writer = new FileWriter(file, false);
             BufferedWriter buffer = new BufferedWriter(writer);
@@ -395,7 +425,7 @@ public class Go {
             gson.toJson(new LocalStageConfig(true), buffer);
             buffer.flush();
             buffer.close();
-            System.out.println("Please examine \"" + file + "\" and update the stage parameters as needed");
+            System.out.println("Please examine \""+ file +"\" and update the stage parameters as needed");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -404,17 +434,17 @@ public class Go {
     static File findLocalStatusCache(String workDir, String fileName) {
         File filePath = null;
         try {
-            filePath = new File(workDir + "\\" + fileName).getCanonicalFile();
+            filePath = new File(workDir +"\\"+ fileName).getCanonicalFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         if (!filePath.exists()) {
-            System.out.println("Cannot find \"" + filePath.toString() + "\"");
+            System.out.println("Cannot find \""+ filePath.toString() +"\"");
             createLocalStatusCache(filePath);
             System.exit(1);
         }
-        System.out.println("Found JSON \"" + filePath.toString() + "\"");
+        System.out.println("Found JSON \""+ filePath.toString() +"\"");
         return filePath;
     }
 
@@ -438,7 +468,7 @@ public class Go {
 
     static void createLocalStatusCache(File file) {
         try {
-//            System.out.println("Creating JSON template \"" + file.toString() + "\"");
+//            System.out.println("Creating JSON template \""+ file.toString() +"\"");
             System.out.println("Creating...");
             FileWriter writer = new FileWriter(file, false);
             BufferedWriter buffer = new BufferedWriter(writer);
@@ -464,7 +494,7 @@ public class Go {
             gson.toJson((updateStatusCache), buffer);
             buffer.flush();
             buffer.close();
-            System.out.println("Updated JSON status cache \"" + file.toString() + "\"");
+            System.out.println("Updated JSON status cache \""+ file.toString() +"\"");
         } catch (IOException e) {
             e.printStackTrace();
         }

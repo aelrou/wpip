@@ -44,7 +44,7 @@ public class WrapFindElements {
 
                 break;
             default:
-                throw new CustomExceptLocatorType("Unknown locatorType " + locatorType);
+                throw new CustomExceptLocatorType("Unknown locatorType "+ locatorType);
         }
         return elementList;
     }

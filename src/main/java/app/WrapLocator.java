@@ -16,7 +16,7 @@ public class WrapLocator {
             seconds = 10;
         }
 
-        System.out.println("Look for " + locatorType + " \"" + locator + "\" for "+ seconds +" sec");
+        System.out.println("Look for "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
 
         int loopTime = 200;
         int maxLoops = (1000/loopTime) * seconds;
@@ -30,7 +30,7 @@ public class WrapLocator {
                 element = find.with(driver, locatorType, locator);
                 if (element == null) {
                     if (loop > maxLoops) {
-                        throw new CustomExceptElementWait("Unable to create WebElement with " + locatorType + " \"" + locator + "\" after " + seconds +" seconds");
+                        throw new CustomExceptElementWait("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" after "+ seconds +" seconds");
                     }
                     loop +=1;
                     Thread.sleep(loopTime);
@@ -71,7 +71,7 @@ public class WrapLocator {
             seconds = 10;
         }
 
-        System.out.println("Count all " + locatorType + " \"" + locator + "\" for "+ seconds +" sec");
+        System.out.println("Count all "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
 
         int loopTime = 200;
         int maxLoops = (1000/loopTime) * seconds;
@@ -85,7 +85,7 @@ public class WrapLocator {
                 elements = find.with(driver, locatorType, locator);
                 if (elements == null) {
                     if (loop > maxLoops) {
-                        throw new CustomExceptElementWait("Unable to find WebElements with " + locatorType + " \"" + locator + "\" after " + seconds +" seconds");
+                        throw new CustomExceptElementWait("Unable to find WebElements with "+ locatorType +" \""+ locator +"\" after "+ seconds +" seconds");
                     }
                     loop +=1;
                     Thread.sleep(loopTime);
@@ -126,7 +126,7 @@ public class WrapLocator {
             seconds = 10;
         }
 
-        System.out.println("Look for visible " + locatorType + " \"" + locator + "\" for "+ seconds +" sec");
+        System.out.println("Look for visible "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
 
         int loopTime = 200;
         int maxLoops = (1000/loopTime) * seconds;
@@ -140,14 +140,14 @@ public class WrapLocator {
                 element = find.with(driver, locatorType, locator);
                 if (element == null) {
                     if (loop > maxLoops) {
-                        throw new CustomExceptElementWait("Unable to create WebElement with " + locatorType + " \"" + locator + "\" after " + seconds +" seconds");
+                        throw new CustomExceptElementWait("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" after "+ seconds +" seconds");
                     }
                     loop +=1;
                     Thread.sleep(loopTime);
                 }
                 if (!element.isDisplayed()) {
                     if (loop > maxLoops) {
-                        throw new CustomExceptElementWait("WebElement of " + locatorType + " \"" + locator + "\" it is not visible after " + seconds +" seconds");
+                        throw new CustomExceptElementWait("WebElement of "+ locatorType +" \""+ locator +"\" it is not visible after "+ seconds +" seconds");
                     }
                     loop +=1;
                     Thread.sleep(loopTime);
@@ -188,7 +188,7 @@ public class WrapLocator {
             seconds = 10;
         }
 
-        System.out.println("Look for enabled " + locatorType + " \"" + locator + "\" for "+ seconds +" sec");
+        System.out.println("Look for enabled "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
 
         int loopTime = 200;
         int maxLoops = (1000/loopTime) * seconds;
@@ -202,21 +202,21 @@ public class WrapLocator {
                 element = find.with(driver, locatorType, locator);
                 if (element == null) {
                     if (loop > maxLoops) {
-                        throw new CustomExceptElementWait("Unable to create WebElement with " + locatorType + " \"" + locator + "\" after " + seconds +" seconds");
+                        throw new CustomExceptElementWait("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" after "+ seconds +" seconds");
                     }
                     loop +=1;
                     Thread.sleep(loopTime);
                 }
                 if (!element.isDisplayed()) {
                     if (loop > maxLoops) {
-                        throw new CustomExceptElementWait("WebElement of " + locatorType + " \"" + locator + "\" it is not visible after " + seconds +" seconds");
+                        throw new CustomExceptElementWait("WebElement of "+ locatorType +" \""+ locator +"\" it is not visible after "+ seconds +" seconds");
                     }
                     loop +=1;
                     Thread.sleep(loopTime);
                 }
                 if (!element.isEnabled()) {
                     if (loop > maxLoops) {
-                        throw new CustomExceptElementWait("WebElement of " + locatorType + " \"" + locator + "\" it is not enabled after " + seconds +" seconds");
+                        throw new CustomExceptElementWait("WebElement of "+ locatorType +" \""+ locator +"\" it is not enabled after "+ seconds +" seconds");
                     }
                     loop +=1;
                     Thread.sleep(loopTime);
@@ -257,7 +257,7 @@ public class WrapLocator {
             seconds = 10;
         }
 
-        System.out.println("Look for clickable " + locatorType + " \"" + locator + "\" for "+ seconds +" sec");
+        System.out.println("Look for clickable "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
 
         int loopTime = 200;
         int maxLoops = (1000 / loopTime) * seconds;
@@ -271,7 +271,7 @@ public class WrapLocator {
                 element = find.with(driver, locatorType, locator);
                 if (element == null) {
                     if (loop > maxLoops) {
-                        throw new CustomExceptElementWait("Unable to create WebElement with " + locatorType + " \"" + locator + "\" after " + seconds + " seconds");
+                        throw new CustomExceptElementWait("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" after "+ seconds +" seconds");
                     }
                     loop += 1;
                     Thread.sleep(loopTime);
@@ -311,7 +311,7 @@ public class WrapLocator {
         try {
             elementClickable = wait.until(ExpectedConditions.elementToBeClickable(element));
         } catch (TimeoutException te) {
-            throw new CustomExceptElementWait("WebElement of " + locatorType + " \"" + locator + "\" it is not clickable after " + seconds + " seconds");
+            throw new CustomExceptElementWait("WebElement of "+ locatorType +" \""+ locator +"\" it is not clickable after "+ seconds +" seconds");
         }
 
         return elementClickable;

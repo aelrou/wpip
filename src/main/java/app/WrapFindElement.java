@@ -17,7 +17,7 @@ public class WrapFindElement {
                 if (elementList.size() == 1) {
                     element = driver.findElement(By.className(locator));
                 } else {
-                    throw new CustomExceptElementCount("Unable to create WebElement with " + locatorType + " \"" + locator + "\" because there are " + elementList.size());
+                    throw new CustomExceptElementCount("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" because there are "+ elementList.size());
                 }
                 break;
             case CSSSELECTOR:
@@ -25,7 +25,7 @@ public class WrapFindElement {
                 if (elementList.size() == 1) {
                     element = driver.findElement(By.cssSelector(locator));
                 } else {
-                    throw new CustomExceptElementCount("Unable to create WebElement with " + locatorType + " \"" + locator + "\" because there are " + elementList.size());
+                    throw new CustomExceptElementCount("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" because there are "+ elementList.size());
                 }
                 break;
             case ID:
@@ -33,7 +33,7 @@ public class WrapFindElement {
                 if (elementList.size() == 1) {
                     element = driver.findElement(By.id(locator));
                 } else {
-                    throw new CustomExceptElementCount("Unable to create WebElement with " + locatorType + " \"" + locator + "\" because there are " + elementList.size());
+                    throw new CustomExceptElementCount("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" because there are "+ elementList.size());
                 }
                 break;
             case LINKTEXT:
@@ -41,7 +41,7 @@ public class WrapFindElement {
                 if (elementList.size() == 1) {
                     element = driver.findElement(By.linkText(locator));
                 } else {
-                    throw new CustomExceptElementCount("Unable to create WebElement with " + locatorType + " \"" + locator + "\" because there are " + elementList.size());
+                    throw new CustomExceptElementCount("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" because there are "+ elementList.size());
                 }
                 break;
             case NAME:
@@ -49,7 +49,7 @@ public class WrapFindElement {
                 if (elementList.size() == 1) {
                     element = driver.findElement(By.name(locator));
                 } else {
-                    throw new CustomExceptElementCount("Unable to create WebElement with " + locatorType + " \"" + locator + "\" because there are " + elementList.size());
+                    throw new CustomExceptElementCount("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" because there are "+ elementList.size());
                 }
                 break;
             case PARTIALLINKTEXT:
@@ -57,7 +57,7 @@ public class WrapFindElement {
                 if (elementList.size() == 1) {
                     element = driver.findElement(By.partialLinkText(locator));
                 } else {
-                    throw new CustomExceptElementCount("Unable to create WebElement with " + locatorType + " \"" + locator + "\" because there are " + elementList.size());
+                    throw new CustomExceptElementCount("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" because there are "+ elementList.size());
                 }
                 break;
             case TAGNAME:
@@ -65,7 +65,7 @@ public class WrapFindElement {
                 if (elementList.size() == 1) {
                     element = driver.findElement(By.tagName(locator));
                 } else {
-                    throw new CustomExceptElementCount("Unable to create WebElement with " + locatorType + " \"" + locator + "\" because there are " + elementList.size());
+                    throw new CustomExceptElementCount("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" because there are "+ elementList.size());
                 }
                 break;
             case XPATH:
@@ -73,11 +73,11 @@ public class WrapFindElement {
                 if (elementList.size() == 1) {
                     element = driver.findElement(By.xpath(locator));
                 } else {
-                    throw new CustomExceptElementCount("Unable to create WebElement with " + locatorType + " \"" + locator + "\" because there are " + elementList.size());
+                    throw new CustomExceptElementCount("Unable to create WebElement with "+ locatorType +" \""+ locator +"\" because there are "+ elementList.size());
                 }
                 break;
             default:
-                throw new CustomExceptLocatorType("Unknown locatorType " + locatorType);
+                throw new CustomExceptLocatorType("Unknown locatorType "+ locatorType);
         }
         return element;
     }
