@@ -17,6 +17,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.opera.OperaDriver;
@@ -83,14 +84,17 @@ public class Go {
             case "FirefoxDriver":
                 executable = workDir + "\\" + localBinConfig.FIREFOX_DRIVER;
                 System.setProperty("webdriver.gecko.driver", executable);
-                driver = new FirefoxDriver();
+                FirefoxOptions firefoxVisibleOptions = new FirefoxOptions();
+                firefoxVisibleOptions.setProfile(new FirefoxProfile(new File(localBinConfig.FIREFOX_PROFILE)));
+                driver = new FirefoxDriver(firefoxVisibleOptions);
                 break;
             case "FirefoxHeadlessDriver":
                 executable = workDir +"\\"+ localBinConfig.FIREFOX_DRIVER;
                 System.setProperty("webdriver.gecko.driver", executable);
-                FirefoxOptions firefoxOptions = new FirefoxOptions();
-                firefoxOptions.addArguments("--headless");
-                driver = new FirefoxDriver(firefoxOptions);
+                FirefoxOptions firefoxHeadlessOptions = new FirefoxOptions();
+                firefoxHeadlessOptions.setProfile(new FirefoxProfile(new File(localBinConfig.FIREFOX_PROFILE)));
+                firefoxHeadlessOptions.addArguments("--headless");
+                driver = new FirefoxDriver(firefoxHeadlessOptions);
                 break;
             case "HtmlUnitDriver":
                 capabilities = new DesiredCapabilities();
@@ -215,7 +219,7 @@ public class Go {
             element = WrapLocator.waitClickable(driver, Loc.XPATH, ipNotifySubmitXpath, 10);
             element.click();
 
-            WrapLocator.waitClickable(driver, Loc.XPATH, ipNotifyConfirmXpath, 10);
+            WrapLocator.waitDisplay(driver, Loc.XPATH, ipNotifyConfirmXpath, 10);
 
             updateLocalStatusCache(localStatusCacheFile, currentIp);
         }

@@ -2,6 +2,7 @@ package app;
 
 public class LocalBinConfig {
     public String FIREFOX_DRIVER;
+    public String FIREFOX_PROFILE;
     public String CHROME_DRIVER;
     public String IE_DRIVER;
     public String EDGE_DRIVER;
@@ -12,6 +13,7 @@ public class LocalBinConfig {
     public LocalBinConfig (boolean useDefault) {
         if(useDefault) {
             this.FIREFOX_DRIVER = "webdriver_binary\\geckodriver-v0.20.1-win64\\geckodriver.exe";
+            this.FIREFOX_PROFILE = "C:\\Users\\NONEXISTANT\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\NONEXISTANT";
             this.CHROME_DRIVER = "webdriver_binary\\chromedriver_2.38_win32\\chromedriver.exe";
             this.IE_DRIVER = "webdriver_binary\\IEDriverServer_Win32_3.12.0\\IEDriverServer.exe";
             this.EDGE_DRIVER = "webdriver_binary\\MicrosoftWebDriver17134\\MicrosoftWebDriver.exe";
