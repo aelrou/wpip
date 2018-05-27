@@ -2,3 +2,5 @@ target
 workspace.xml
 tasks.xml
 *.json
+*.jar
+*.exe
