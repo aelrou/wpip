@@ -63,7 +63,6 @@ public class Go {
         LocalStatusCache localStatusCache = readLocalStatusCache(localStatusCacheFile);
 
         String executable;
-        DesiredCapabilities capabilities;
         WebDriver driver = null;
 
         switch (localRunConfig.RUNTIME_DRIVER) {
@@ -104,16 +103,18 @@ public class Go {
                 driver = new FirefoxDriver(firefoxHeadlessOptions);
                 break;
             case "HtmlUnitDriver":
-                capabilities = new DesiredCapabilities();
-                capabilities.setBrowserName("htmlunit");
-                capabilities.setJavascriptEnabled(true);
-                capabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
-                driver = new HtmlUnitDriver(capabilities);
+                DesiredCapabilities htmlUnitCapabilities = new DesiredCapabilities();
+                htmlUnitCapabilities.setBrowserName("htmlunit");
+                htmlUnitCapabilities.setJavascriptEnabled(true);
+                htmlUnitCapabilities.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
+                driver = new HtmlUnitDriver(htmlUnitCapabilities);
                 break;
             case "InternetExplorerDriver":
-                // If IE is very slow, make sure that the protected mode is either enabled or disabled for all zones, and also make sure that "Enable 64-bit processes for Enhanced Protected Mode" is checked properly according to what version of IE is being used.
-                // Ensure that the 3 Registry patches have been installed.
-                // Ensure that the IEDriverServer.exe is in the PATH variable.
+                // Ensure that "Enable Protected Mode" in Internet Options is either checked or unchecked the same for all 4 security zones.
+                // Ensure that "Enable Enhanced Protected Mode" in Advanced Internet Options is unchecked.
+                // Ensure that "Enable 64-bit processes for Enhanced Protected Mode" is checked if using 64-bit IEDriverServer.exe, or unchecked if using 32-bit IEDriverServer.exe
+                // Ensure that the FEATURE_BFCACHE and MaxUserPort registry keys have been installed.
+                // Ensure that the path to IEDriverServer.exe is in the PATH variable.
                 // Ensure that there is an exception in the Windows Firewall for IEDriverServer.exe
                 executable = workDir +"\\"+ localBinConfig.IE_DRIVER;
                 System.setProperty("webdriver.ie.driver", executable);
@@ -130,10 +131,10 @@ public class Go {
                 break;
             case "PhantomJSDriver":
                 executable = workDir +"\\"+ localBinConfig.PHANTOMJS_DRIVER;
-                capabilities = new DesiredCapabilities();
-                capabilities.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, executable);
-                capabilities.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, new String[]{"--ignore-ssl-errors=true", "--ssl-protocol=any", "--web-security=false",});
-                driver = new PhantomJSDriver(capabilities);
+                DesiredCapabilities phantomJsCapabilities = new DesiredCapabilities();
+                phantomJsCapabilities.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, executable);
+                phantomJsCapabilities.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, new String[]{"--ignore-ssl-errors=true", "--ssl-protocol=any", "--web-security=false",});
+                driver = new PhantomJSDriver(phantomJsCapabilities);
                 break;
             case "OperaDriver":
                 executable = workDir +"\\"+ localBinConfig.OPERA_DRIVER;
@@ -154,7 +155,7 @@ public class Go {
         }
 
         Dimension window = new Dimension(localRunConfig.BROWSER_WIDTH, localRunConfig.BROWSER_HEIGHT);
-        // This cannot be relied upon when using headless mode. Must specify the screen size in a config.
+        // This cannot be relied upon in headless mode. Specify the screen size in a config instead.
         // java.awt.Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
         driver.manage().window().setSize(window);
         Point position = new Point(localRunConfig.SCREEN_WIDTH - window.width, -40);
@@ -205,9 +206,11 @@ public class Go {
 
             WrapGet.waitPage(driver, ipCheckUrl, Loc.XPATH, ipCheckXpath, 10);
 
-            WebElement googleReport;
-            googleReport = WrapLocator.waitDisplay(driver, Loc.XPATH, ipCheckXpath, 10);
-            currentIp = googleReport.getText();
+            WebElement ipReport;
+            ipReport = WrapLocator.waitDisplay(driver, Loc.XPATH, ipCheckXpath, 10);
+            currentIp = ipReport.getText();
+
+            WrapGet.waitPage(driver, ipNotifyUrl, Loc.XPATH, ipNotifyFormXpath, 10);
 
         } catch (CustomExceptLocatorType | CustomExceptPageTimeout | CustomExceptElementWait e) {
             System.out.println("Failed to check public IP");
@@ -225,14 +228,12 @@ public class Go {
 
             try {
 
-                WrapGet.waitPage(driver, ipNotifyUrl, Loc.XPATH, ipNotifyFormXpath, 10);
-
-                WebElement nameForm;
-                nameForm = WrapLocator.waitClickable(driver, Loc.XPATH, ipNotifyFormXpath, 10);
+                WebElement notifyForm;
+                notifyForm = WrapLocator.waitClickable(driver, Loc.XPATH, ipNotifyFormXpath, 10);
                 Actions actionForm = new Actions(driver);
-                actionForm.moveToElement(nameForm).build().perform();
-                nameForm.clear();
-                nameForm.sendKeys(localRunConfig.DEVICE_NAME);
+                actionForm.moveToElement(notifyForm).build().perform();
+                notifyForm.clear();
+                notifyForm.sendKeys(localRunConfig.DEVICE_NAME);
 
                 WebElement submitButton;
                 submitButton = WrapLocator.waitClickable(driver, Loc.XPATH, ipNotifySubmitXpath, 10);
@@ -246,7 +247,7 @@ public class Go {
 
                 updateLocalStatusCache(localStatusCacheFile, currentIp);
 
-            } catch (CustomExceptLocatorType | CustomExceptPageTimeout | CustomExceptElementWait e) {
+            } catch (CustomExceptLocatorType | CustomExceptElementWait e) {
                 System.out.println("Failed to send update notification");
                 e.printStackTrace();
                 System.exit(1);
