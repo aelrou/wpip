@@ -1,14 +1,14 @@
 # wpip
-Public IP address monitor and notify utility for Windows using Java Selenium WebDriver
+Public IP address monitor and notify utility using Java Selenium WebDriver on Windows
 
-* Works on [Java 10](http://www.oracle.com/technetwork/java/javase/downloads/index.html)  
+* Builds in [Java 10](http://www.oracle.com/technetwork/java/javase/downloads/index.html)  
   `JAVA_HOME - C:\Program Files\Java\jdk-10.0.1`  
-  ` JRE_HOME - C:\Program Files\Java\jre-10.0.1`  
-  `     PATH - C:\Program Files\Java\jre-10.0.1\bin`
+  `JRE_HOME - C:\Program Files\Java\jre-10.0.1`  
+  `PATH - C:\Program Files\Java\jre-10.0.1\bin`
 
 * Build JAR with dependencies using [Maven](https://maven.apache.org/)  
   `M2_HOME - C:\Program Files\Maven`  
-  `   PATH - C:\Program Files\Maven\bin`  
+  `PATH - C:\Program Files\Maven\bin`  
   `C:\wpip>mvn clean package`
 
 * __WebDriver executables not included__  
