@@ -10,6 +10,8 @@ public class LocalRunConfig {
     public String RUNTIME_STAGE;
     public String AVALIBLE_DRIVERS;
     public String AVALIBLE_STAGES;
+    public String LOGS_PATH;
+    public String LOG_NAME;
 
     public LocalRunConfig (boolean useDefault) {
         if(useDefault) {
@@ -22,6 +24,8 @@ public class LocalRunConfig {
             this.RUNTIME_STAGE = "Development";
             this.AVALIBLE_DRIVERS = "ChromeDriver ChromeHeadlessDriver EdgeDriver FirefoxDriver FirefoxHeadlessDriver HtmlUnitDriver InternetExplorerDriver JBrowserDriver OperaDriver PhantomJSDriver SafariDriver";
             this.AVALIBLE_STAGES = "Development Test PRODUCTION";
+            this.LOGS_PATH = "C:\\Users\\Public\\wpip";
+            this.LOG_NAME = "wpip.log";
         }
     }
 }

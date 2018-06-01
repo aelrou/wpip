@@ -16,7 +16,7 @@ public class WrapLocator {
             seconds = 10;
         }
 
-        System.out.println("Look for "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
+        System.out.println(Go.indent +"Look for "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
 
         int loopTime = 200;
         int maxLoops = (1000/loopTime) * seconds;
@@ -71,7 +71,7 @@ public class WrapLocator {
             seconds = 10;
         }
 
-        System.out.println("Count all "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
+        System.out.println(Go.indent +"Count all "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
 
         int loopTime = 200;
         int maxLoops = (1000/loopTime) * seconds;
@@ -126,7 +126,7 @@ public class WrapLocator {
             seconds = 10;
         }
 
-        System.out.println("Look for visible "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
+        System.out.println(Go.indent +"Look for visible "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
 
         int loopTime = 200;
         int maxLoops = (1000/loopTime) * seconds;
@@ -188,7 +188,7 @@ public class WrapLocator {
             seconds = 10;
         }
 
-        System.out.println("Look for enabled "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
+        System.out.println(Go.indent +"Look for enabled "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
 
         int loopTime = 200;
         int maxLoops = (1000/loopTime) * seconds;
@@ -257,7 +257,7 @@ public class WrapLocator {
             seconds = 10;
         }
 
-        System.out.println("Look for clickable "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
+        System.out.println(Go.indent +"Look for clickable "+ locatorType +" \""+ locator +"\" for "+ seconds +" sec");
 
         int loopTime = 200;
         int maxLoops = (1000 / loopTime) * seconds;

@@ -31,8 +31,9 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
 
-
 public class Go {
+
+    public static final String indent ="    ";
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -55,6 +56,8 @@ public class Go {
 
         File localRunConfigFile = findLocalRunConfig(workDir,"LocalRunConfig.json");
         LocalRunConfig localRunConfig = readLocalRunConfig(localRunConfigFile);
+
+        String logFile = Log.find(localRunConfig.LOGS_PATH, localRunConfig.LOG_NAME);
 
         File localStageConfigFile = findLocalStageConfig(workDir,"LocalStageConfig.json");
         LocalStageConfig localStageConfig = readLocalStageConfig(localStageConfigFile);
@@ -213,18 +216,18 @@ public class Go {
             WrapGet.waitPage(driver, ipNotifyUrl, Loc.XPATH, ipNotifyFormXpath, 10);
 
         } catch (CustomExceptLocatorType | CustomExceptPageTimeout | CustomExceptElementWait e) {
-            System.out.println("Failed to check public IP");
+            Log.save(logFile, "Failed to check public IP");
             e.printStackTrace();
             System.exit(1);
         }
 
         if (currentIp.equals(localStatusCache.IP_CACHE)){
 
-            System.out.println("The reported IP "+ currentIp +" matches the cached IP "+ localStatusCache.IP_CACHE);
+            Log.save(logFile, "No change in reported IP "+ currentIp);
 
         } else {
 
-            System.out.println("The reported IP "+ currentIp +" is different from the cached IP "+ localStatusCache.IP_CACHE);
+            Log.save(logFile, "The reported IP "+ currentIp +" is different from the cached IP "+ localStatusCache.IP_CACHE);
 
             try {
 
@@ -248,7 +251,7 @@ public class Go {
                 updateLocalStatusCache(localStatusCacheFile, currentIp);
 
             } catch (CustomExceptLocatorType | CustomExceptElementWait e) {
-                System.out.println("Failed to send update notification");
+                Log.save(logFile, "Failed to send update notification");
                 e.printStackTrace();
                 System.exit(1);
             }
@@ -258,7 +261,7 @@ public class Go {
 
         LocalDateTime stopClock = LocalDateTime.now();
         Duration duration = Duration.between(startClock, stopClock);
-        System.out.println("Process time "+ duration.getSeconds() +" sec");
+        Log.save(logFile, "Process time "+ duration.getSeconds() +" sec");
 
     }
 
