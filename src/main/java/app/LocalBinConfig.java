@@ -1,6 +1,8 @@
 package app;
 
 public class LocalBinConfig {
+    public String TASKLIST;
+    public String TASKKILL;
     public String FIREFOX_DRIVER;
     public String FIREFOX_PROFILE;
     public String CHROME_DRIVER;
@@ -13,6 +15,8 @@ public class LocalBinConfig {
 
     public LocalBinConfig (boolean useDefault) {
         if(useDefault) {
+            this.TASKLIST = "C:\\Windows\\System32\\tasklist.exe";
+            this.TASKKILL = "C:\\Windows\\System32\\taskkill.exe";
             this.FIREFOX_DRIVER = "webdriver_binary\\geckodriver-v0.20.1-win64\\geckodriver.exe";
             this.FIREFOX_PROFILE = "C:\\Users\\NONEXISTANT\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\NONEXISTANT";
             this.CHROME_DRIVER = "webdriver_binary\\chromedriver_2.38_win32\\chromedriver.exe";

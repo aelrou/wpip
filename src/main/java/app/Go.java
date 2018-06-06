@@ -54,6 +54,9 @@ public class Go {
         File localBinConfigFile = findLocalBinConfig(workDir,"LocalBinConfig.json");
         LocalBinConfig localBinConfig = readLocalBinConfig(localBinConfigFile);
 
+        String taskListExe = localBinConfig.TASKLIST;
+        String taskKillExe = localBinConfig.TASKKILL;
+
         File localRunConfigFile = findLocalRunConfig(workDir,"LocalRunConfig.json");
         LocalRunConfig localRunConfig = readLocalRunConfig(localRunConfigFile);
 
@@ -153,6 +156,8 @@ public class Go {
                 break;
             default:
                 System.out.println("Unknown RUNTIME_DRIVER : "+ localRunConfig.RUNTIME_DRIVER);
+                driver.quit();
+                terminateWebDriver(localRunConfig, taskListExe, taskKillExe);
                 System.exit(1);
                 break;
         }
@@ -198,6 +203,8 @@ public class Go {
                 break;
             default:
                 System.out.println("Unknown RUNTIME_STAGE : "+ localRunConfig.RUNTIME_STAGE);
+                driver.quit();
+                terminateWebDriver(localRunConfig, taskListExe, taskKillExe);
                 System.exit(1);
                 break;
         }
@@ -218,6 +225,8 @@ public class Go {
         } catch (CustomExceptLocatorType | CustomExceptPageTimeout | CustomExceptElementWait e) {
             Log.save(logFile, "Failed to check public IP");
             e.printStackTrace();
+            driver.quit();
+            terminateWebDriver(localRunConfig, taskListExe, taskKillExe);
             System.exit(1);
         }
 
@@ -253,11 +262,15 @@ public class Go {
             } catch (CustomExceptLocatorType | CustomExceptElementWait e) {
                 Log.save(logFile, "Failed to send update notification");
                 e.printStackTrace();
+                driver.quit();
+                terminateWebDriver(localRunConfig, taskListExe, taskKillExe);
                 System.exit(1);
             }
         }
 
         driver.quit();
+
+        terminateWebDriver(localRunConfig, taskListExe, taskKillExe);
 
         LocalDateTime stopClock = LocalDateTime.now();
         Duration duration = Duration.between(startClock, stopClock);
@@ -501,6 +514,82 @@ public class Go {
             System.out.println("Updated JSON status cache \""+ file.toString() +"\"");
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    static void terminateWebDriver(LocalRunConfig localRunConfig, String taskListExe, String taskKillExe){
+
+        switch (localRunConfig.RUNTIME_DRIVER) {
+            case "ChromeDriver":
+                if (WinTask.find(taskListExe,"chromedriver.exe")){
+                    WinTask.kill(taskKillExe,"chromedriver.exe", true);
+                }
+                if (WinTask.find(taskListExe,"chrome.exe")){
+                    WinTask.kill(taskKillExe,"chrome.exe", true);
+                }
+                break;
+            case "ChromeHeadlessDriver":
+                if (WinTask.find(taskListExe,"chromedriver.exe")){
+                    WinTask.kill(taskKillExe,"chromedriver.exe", true);
+                }
+                if (WinTask.find(taskListExe,"chrome.exe")){
+                    WinTask.kill(taskKillExe,"chrome.exe", true);
+                }
+                break;
+            case "EdgeDriver":
+                if (WinTask.find(taskListExe,"microsoftwebdriver.exe")){
+                    WinTask.kill(taskKillExe,"microsoftwebdriver.exe", true);
+                }
+                if (WinTask.find(taskListExe,"microsoftedg*.exe")){
+                    WinTask.kill(taskKillExe,"microsoftedg*.exe", true);
+                }
+                break;
+            case "FirefoxDriver":
+                if (WinTask.find(taskListExe,"geckodriver.exe")){
+                    WinTask.kill(taskKillExe,"geckodriver.exe", true);
+                }
+                if (WinTask.find(taskListExe,"firefox.exe")){
+                    WinTask.kill(taskKillExe,"firefox.exe", true);
+                }
+                break;
+            case "FirefoxHeadlessDriver":
+                if (WinTask.find(taskListExe,"geckodriver.exe")){
+                    WinTask.kill(taskKillExe,"geckodriver.exe", true);
+                }
+                if (WinTask.find(taskListExe,"firefox.exe")){
+                    WinTask.kill(taskKillExe,"firefox.exe", true);
+                }
+                break;
+            case "HtmlUnitDriver":
+                break;
+            case "InternetExplorerDriver":
+                if (WinTask.find(taskListExe,"iedriverserver.exe")){
+                    WinTask.kill(taskKillExe,"iedriverserver.exe", true);
+                }
+                if (WinTask.find(taskListExe,"iexplore.exe")){
+                    WinTask.kill(taskKillExe,"iexplore.exe", true);
+                }
+                break;
+            case "JBrowserDriver":
+                break;
+            case "PhantomJSDriver":
+                if (WinTask.find(taskListExe,"phantomjs.exe")){
+                    WinTask.kill(taskKillExe,"phantomjs.exe", true);
+                }
+                break;
+            case "OperaDriver":
+                if (WinTask.find(taskListExe,"operadriver.exe")){
+                    WinTask.kill(taskKillExe,"operadriver.exe", true);
+                }
+                if (WinTask.find(taskListExe,"opera.exe")){
+                    WinTask.kill(taskKillExe,"opera.exe", true);
+                }
+                break;
+            case "SafariDriver":
+                break;
+            default:
+                System.out.println("Unknown RUNTIME_DRIVER : "+ localRunConfig.RUNTIME_DRIVER);
+                break;
         }
     }
 }
