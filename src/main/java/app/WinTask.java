@@ -93,14 +93,17 @@ public class WinTask {
                     pidList.remove(i);
                 }
             }
-
         }
 
-        System.out.println("Kill "+ pidList.size() +" process");
-        for (int i = 0; i < pidList.size(); i += 1) {
-            WinTask.killPid(taskKillExe, pidList.get(i), true);
+        if (pidList.size() > 0) {
+            System.out.println("Kill "+ pidList.size() +" process");
+            for (int i = 0; i < pidList.size(); i += 1) {
+                WinTask.killPid(taskKillExe, pidList.get(i), true);
+            }
+            System.out.println("Ignore "+ exceptPidList.size() +" preexistent process");
+        } else {
+            System.out.println("No process to kill");
         }
-        System.out.println("Ignore "+ exceptPidList.size() +" preexistent process");
     }
 
     static void killPid(String taskKillExe, int pid, boolean force) {
