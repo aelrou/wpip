@@ -51,8 +51,8 @@ public class WinTask {
 
             if (!errorList.isEmpty()) {
                 for(int i = 0; i < errorList.size(); i += 1) {
+                    System.out.println(errorList.get(i).toString());
                     if (errorList.get(i).toString().toLowerCase().contains("no tasks are running which match the specified criteria")){
-                        System.out.println(errorList.get(i).toString());
                         return pidList;
                     }
                 }
@@ -76,13 +76,6 @@ public class WinTask {
                 }
             }
 
-            if (!errorList.isEmpty()) {
-                for(int i = 0; i < errorList.size(); i += 1) {
-                    System.out.println(errorList.get(i).toString());
-                    return pidList;
-                }
-            }
-
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -94,14 +87,6 @@ public class WinTask {
 
         ArrayList<Integer> pidList = WinTask.pidList(taskListExe, imageName);
 
-//        for (int i = 0; i < pidList.size(); i += 1) {
-//            System.out.println("Found: "+ pidList.get(i));
-//        }
-//
-//        for (int i = 0; i < exceptPidList.size(); i += 1) {
-//            System.out.println("Except: "+ exceptPidList.get(i));
-//        }
-
         for (int i = 0; i < pidList.size(); i += 1) {
             for (int e = 0; e < exceptPidList.size(); e += 1) {
                 if (pidList.get(i).equals(exceptPidList.get(e))){
@@ -110,10 +95,6 @@ public class WinTask {
             }
 
         }
-
-//        for (int i = 0; i < pidList.size(); i += 1) {
-//            System.out.println("Remaining: "+ pidList.get(i));
-//        }
 
         System.out.println("Kill "+ pidList.size() +" process");
         for (int i = 0; i < pidList.size(); i += 1) {

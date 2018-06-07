@@ -55,9 +55,6 @@ public class Go {
         File localBinConfigFile = findLocalBinConfig(workDir,"LocalBinConfig.json");
         LocalBinConfig localBinConfig = readLocalBinConfig(localBinConfigFile);
 
-        String taskListExe = localBinConfig.TASKLIST;
-        String taskKillExe = localBinConfig.TASKKILL;
-
         File localRunConfigFile = findLocalRunConfig(workDir,"LocalRunConfig.json");
         LocalRunConfig localRunConfig = readLocalRunConfig(localRunConfigFile);
 
@@ -75,7 +72,7 @@ public class Go {
 
         switch (localRunConfig.RUNTIME_DRIVER) {
             case "ChromeDriver":
-                exceptPidList = WinTask.pidList(taskListExe,"chrome.exe");
+                exceptPidList = WinTask.pidList(localBinConfig.TASKLIST,"chrome.exe");
                 executable = workDir +"\\"+ localBinConfig.CHROME_DRIVER;
                 System.setProperty("webdriver.chrome.driver", executable);
                 ChromeOptions chromeVisibleOptions = new ChromeOptions();
@@ -83,7 +80,7 @@ public class Go {
                 driver = new ChromeDriver(chromeVisibleOptions);
                 break;
             case "ChromeHeadlessDriver":
-                exceptPidList = WinTask.pidList(taskListExe,"chrome.exe");
+                exceptPidList = WinTask.pidList(localBinConfig.TASKLIST,"chrome.exe");
                 executable = workDir +"\\"+ localBinConfig.CHROME_DRIVER;
                 System.setProperty("webdriver.chrome.driver", executable);
                 ChromeOptions chromeHeadlessOptions = new ChromeOptions();
@@ -93,13 +90,13 @@ public class Go {
                 driver = new ChromeDriver(chromeHeadlessOptions);
                 break;
             case "EdgeDriver":
-                exceptPidList = WinTask.pidList(taskListExe,"microsoftedg*.exe");
+                exceptPidList = WinTask.pidList(localBinConfig.TASKLIST,"microsoftedg*.exe");
                 executable = workDir +"\\"+ localBinConfig.EDGE_DRIVER;
                 System.setProperty("webdriver.edge.driver", executable);
                 driver = new EdgeDriver();
                 break;
             case "FirefoxDriver":
-                exceptPidList = WinTask.pidList(taskListExe,"firefox.exe");
+                exceptPidList = WinTask.pidList(localBinConfig.TASKLIST,"firefox.exe");
                 executable = workDir +"\\"+ localBinConfig.FIREFOX_DRIVER;
                 System.setProperty("webdriver.gecko.driver", executable);
                 FirefoxOptions firefoxVisibleOptions = new FirefoxOptions();
@@ -107,7 +104,7 @@ public class Go {
                 driver = new FirefoxDriver(firefoxVisibleOptions);
                 break;
             case "FirefoxHeadlessDriver":
-                exceptPidList = WinTask.pidList(taskListExe,"firefox.exe");
+                exceptPidList = WinTask.pidList(localBinConfig.TASKLIST,"firefox.exe");
                 executable = workDir +"\\"+ localBinConfig.FIREFOX_DRIVER;
                 System.setProperty("webdriver.gecko.driver", executable);
                 FirefoxOptions firefoxHeadlessOptions = new FirefoxOptions();
@@ -129,7 +126,7 @@ public class Go {
                 // Ensure that the FEATURE_BFCACHE and MaxUserPort registry keys have been installed.
                 // Ensure that the path to IEDriverServer.exe is in the PATH variable.
                 // Ensure that there is an exception in the Windows Firewall for IEDriverServer.exe
-                exceptPidList = WinTask.pidList(taskListExe,"iexplore.exe");
+                exceptPidList = WinTask.pidList(localBinConfig.TASKLIST,"iexplore.exe");
                 executable = workDir +"\\"+ localBinConfig.IE_DRIVER;
                 System.setProperty("webdriver.ie.driver", executable);
                 driver = new InternetExplorerDriver();
@@ -144,7 +141,7 @@ public class Go {
                 );
                 break;
             case "PhantomJSDriver":
-                exceptPidList = WinTask.pidList(taskListExe,"phantomjs.exe");
+                exceptPidList = WinTask.pidList(localBinConfig.TASKLIST,"phantomjs.exe");
                 executable = workDir +"\\"+ localBinConfig.PHANTOMJS_DRIVER;
                 DesiredCapabilities phantomJsCapabilities = new DesiredCapabilities();
                 phantomJsCapabilities.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, executable);
@@ -152,7 +149,7 @@ public class Go {
                 driver = new PhantomJSDriver(phantomJsCapabilities);
                 break;
             case "OperaDriver":
-                exceptPidList = WinTask.pidList(taskListExe,"opera.exe");
+                exceptPidList = WinTask.pidList(localBinConfig.TASKLIST,"opera.exe");
                 executable = workDir +"\\"+ localBinConfig.OPERA_DRIVER;
                 OperaOptions operaOptions = new OperaOptions();
                 operaOptions.setBinary(executable);
@@ -167,7 +164,7 @@ public class Go {
             default:
                 System.out.println("Unknown RUNTIME_DRIVER : "+ localRunConfig.RUNTIME_DRIVER);
                 driver.quit();
-                terminateWebDriver(localRunConfig, taskListExe, taskKillExe, exceptPidList);
+                terminateWebDriver(localRunConfig, localBinConfig.TASKLIST, localBinConfig.TASKKILL, exceptPidList);
                 System.exit(1);
                 break;
         }
@@ -214,7 +211,7 @@ public class Go {
             default:
                 System.out.println("Unknown RUNTIME_STAGE : "+ localRunConfig.RUNTIME_STAGE);
                 driver.quit();
-                terminateWebDriver(localRunConfig, taskListExe, taskKillExe, exceptPidList);
+                terminateWebDriver(localRunConfig, localBinConfig.TASKLIST, localBinConfig.TASKKILL, exceptPidList);
                 System.exit(1);
                 break;
         }
@@ -236,7 +233,7 @@ public class Go {
             Log.save(logFile, "Failed to check public IP");
             e.printStackTrace();
             driver.quit();
-            terminateWebDriver(localRunConfig, taskListExe, taskKillExe, exceptPidList);
+            terminateWebDriver(localRunConfig, localBinConfig.TASKLIST, localBinConfig.TASKKILL, exceptPidList);
             System.exit(1);
         }
 
@@ -273,14 +270,14 @@ public class Go {
                 Log.save(logFile, "Failed to send update notification");
                 e.printStackTrace();
                 driver.quit();
-                terminateWebDriver(localRunConfig, taskListExe, taskKillExe, exceptPidList);
+                terminateWebDriver(localRunConfig, localBinConfig.TASKLIST, localBinConfig.TASKKILL, exceptPidList);
                 System.exit(1);
             }
         }
 
         driver.quit();
 
-        terminateWebDriver(localRunConfig, taskListExe, taskKillExe, exceptPidList);
+        terminateWebDriver(localRunConfig, localBinConfig.TASKLIST, localBinConfig.TASKKILL, exceptPidList);
 
         LocalDateTime stopClock = LocalDateTime.now();
         Duration duration = Duration.between(startClock, stopClock);
