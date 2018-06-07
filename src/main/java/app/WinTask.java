@@ -5,16 +5,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.regex.*;
 
 public class WinTask {
 
-    public static boolean find(String taskListExe, String imageName) {
+    public static ArrayList<Integer> pidList(String taskListExe, String imageName) {
 
-        boolean processFound = false;
+        ArrayList<Integer> pidList = new ArrayList();
 
         try {
             Runtime run = Runtime.getRuntime();
-            String[] commands = {"\""+ taskListExe +"\"", "/fi", "\""+ imageName +"\""};
+            String[] commands = {"\""+ taskListExe +"\"", "/fi", "\"IMAGENAME eq "+ imageName +"\""};
             Process proc = run.exec(commands);
 
             InputStream iStream = proc.getInputStream();
@@ -42,37 +43,91 @@ public class WinTask {
             if (!statusList.isEmpty()) {
                 for(int i = 0; i < statusList.size(); i += 1) {
                     if (statusList.get(i).toString().toLowerCase().contains("no tasks are running which match the specified criteria")){
-                        break;
+                        System.out.println(statusList.get(i).toString());
+                        return pidList;
                     }
-                    if (statusList.get(i).toString().toLowerCase().contains(imageName)){
-                        processFound = true;
-                        break;
-                    }
-//                    Log.save(logFile, statusList.get(i).toString());
                 }
             }
 
             if (!errorList.isEmpty()) {
                 for(int i = 0; i < errorList.size(); i += 1) {
-                    if (statusList.get(i).toString().toLowerCase().contains("no tasks are running which match the specified criteria")){
-                        break;
+                    if (errorList.get(i).toString().toLowerCase().contains("no tasks are running which match the specified criteria")){
+                        System.out.println(errorList.get(i).toString());
+                        return pidList;
                     }
                 }
-//                Log.save(logFile, errorList.get(i).toString());
             }
+
+            if (!statusList.isEmpty()) {
+                Pattern pattern = Pattern.compile("([^\\s]+)\\s+(\\d+)\\s+.+", Pattern.CASE_INSENSITIVE);
+                Matcher matcher;
+                String imageNameListed;
+                int pidListed;
+                for(int i = 0; i < statusList.size(); i += 1) {
+                    if (statusList.get(i).toString().toLowerCase().contains(imageName.toLowerCase())){
+                        matcher = pattern.matcher(statusList.get(i).toString());
+                        if (matcher.matches() && matcher.groupCount() == 2) {
+                            imageNameListed = matcher.group(1);
+                            pidListed = Integer.parseInt(matcher.group(2));
+//                            System.out.println("    "+ imageNameListed +" "+ Integer.toString(pidListed));
+                            pidList.add(pidListed);
+                        }
+                    }
+                }
+            }
+
+            if (!errorList.isEmpty()) {
+                for(int i = 0; i < errorList.size(); i += 1) {
+                    System.out.println(errorList.get(i).toString());
+                    return pidList;
+                }
+            }
+
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
 
-        return processFound;
+        return pidList;
     }
 
-    public static void kill(String taskKillExe, String imageName, boolean force) {
+    public static void kill(String taskListExe, String taskKillExe, String imageName, ArrayList<Integer> exceptPidList) {
+
+        ArrayList<Integer> pidList = WinTask.pidList(taskListExe, imageName);
+
+//        for (int i = 0; i < pidList.size(); i += 1) {
+//            System.out.println("Found: "+ pidList.get(i));
+//        }
+//
+//        for (int i = 0; i < exceptPidList.size(); i += 1) {
+//            System.out.println("Except: "+ exceptPidList.get(i));
+//        }
+
+        for (int i = 0; i < pidList.size(); i += 1) {
+            for (int e = 0; e < exceptPidList.size(); e += 1) {
+                if (pidList.get(i).equals(exceptPidList.get(e))){
+                    pidList.remove(i);
+                }
+            }
+
+        }
+
+//        for (int i = 0; i < pidList.size(); i += 1) {
+//            System.out.println("Remaining: "+ pidList.get(i));
+//        }
+
+        System.out.println("Kill "+ pidList.size() +" process");
+        for (int i = 0; i < pidList.size(); i += 1) {
+            WinTask.killPid(taskKillExe, imageName, pidList.get(i), true);
+        }
+        System.out.println("Ignore "+ exceptPidList.size() +" preexistent process");
+    }
+
+    static void killPid(String taskKillExe, String imageName, int pid, boolean force) {
 
         try {
             Runtime run = Runtime.getRuntime();
-            String[] commandsForce = {"\""+ taskKillExe +"\"", "/f", "/im", "\""+ imageName +"\"", "/t"};
-            String[] commands = {"\""+ taskKillExe +"\"", "/im", "\""+ imageName +"\"", "/t"};
+            String[] commandsForce = {"\""+ taskKillExe +"\"", "/f", "/pid "+ pid,"/im", "\"IMAGENAME eq "+ imageName +"\"", "/t"};
+            String[] commands = {"\""+ taskKillExe +"\"", "/pid "+ pid,"/im", "\"IMAGENAME eq "+ imageName +"\"", "/t"};
 
             Process proc;
             if (force == true) {
@@ -80,6 +135,7 @@ public class WinTask {
             } else {
                 proc = run.exec(commands);
             }
+            System.out.println("    "+ imageName +" "+ pid);
 
             InputStream iStream = proc.getInputStream();
             InputStreamReader iStreamReader = new InputStreamReader(iStream);

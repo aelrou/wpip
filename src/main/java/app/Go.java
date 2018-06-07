@@ -3,6 +3,7 @@ package app;
 import java.io.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -69,10 +70,12 @@ public class Go {
         LocalStatusCache localStatusCache = readLocalStatusCache(localStatusCacheFile);
 
         String executable;
+        ArrayList<Integer> exceptPidList = new ArrayList();
         WebDriver driver = null;
 
         switch (localRunConfig.RUNTIME_DRIVER) {
             case "ChromeDriver":
+                exceptPidList = WinTask.pidList(taskListExe,"chrome.exe");
                 executable = workDir +"\\"+ localBinConfig.CHROME_DRIVER;
                 System.setProperty("webdriver.chrome.driver", executable);
                 ChromeOptions chromeVisibleOptions = new ChromeOptions();
@@ -80,6 +83,7 @@ public class Go {
                 driver = new ChromeDriver(chromeVisibleOptions);
                 break;
             case "ChromeHeadlessDriver":
+                exceptPidList = WinTask.pidList(taskListExe,"chrome.exe");
                 executable = workDir +"\\"+ localBinConfig.CHROME_DRIVER;
                 System.setProperty("webdriver.chrome.driver", executable);
                 ChromeOptions chromeHeadlessOptions = new ChromeOptions();
@@ -89,11 +93,13 @@ public class Go {
                 driver = new ChromeDriver(chromeHeadlessOptions);
                 break;
             case "EdgeDriver":
+                exceptPidList = WinTask.pidList(taskListExe,"microsoftedg*.exe");
                 executable = workDir +"\\"+ localBinConfig.EDGE_DRIVER;
                 System.setProperty("webdriver.edge.driver", executable);
                 driver = new EdgeDriver();
                 break;
             case "FirefoxDriver":
+                exceptPidList = WinTask.pidList(taskListExe,"firefox.exe");
                 executable = workDir +"\\"+ localBinConfig.FIREFOX_DRIVER;
                 System.setProperty("webdriver.gecko.driver", executable);
                 FirefoxOptions firefoxVisibleOptions = new FirefoxOptions();
@@ -101,6 +107,7 @@ public class Go {
                 driver = new FirefoxDriver(firefoxVisibleOptions);
                 break;
             case "FirefoxHeadlessDriver":
+                exceptPidList = WinTask.pidList(taskListExe,"firefox.exe");
                 executable = workDir +"\\"+ localBinConfig.FIREFOX_DRIVER;
                 System.setProperty("webdriver.gecko.driver", executable);
                 FirefoxOptions firefoxHeadlessOptions = new FirefoxOptions();
@@ -122,6 +129,7 @@ public class Go {
                 // Ensure that the FEATURE_BFCACHE and MaxUserPort registry keys have been installed.
                 // Ensure that the path to IEDriverServer.exe is in the PATH variable.
                 // Ensure that there is an exception in the Windows Firewall for IEDriverServer.exe
+                exceptPidList = WinTask.pidList(taskListExe,"iexplore.exe");
                 executable = workDir +"\\"+ localBinConfig.IE_DRIVER;
                 System.setProperty("webdriver.ie.driver", executable);
                 driver = new InternetExplorerDriver();
@@ -136,6 +144,7 @@ public class Go {
                 );
                 break;
             case "PhantomJSDriver":
+                exceptPidList = WinTask.pidList(taskListExe,"phantomjs.exe");
                 executable = workDir +"\\"+ localBinConfig.PHANTOMJS_DRIVER;
                 DesiredCapabilities phantomJsCapabilities = new DesiredCapabilities();
                 phantomJsCapabilities.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, executable);
@@ -143,6 +152,7 @@ public class Go {
                 driver = new PhantomJSDriver(phantomJsCapabilities);
                 break;
             case "OperaDriver":
+                exceptPidList = WinTask.pidList(taskListExe,"opera.exe");
                 executable = workDir +"\\"+ localBinConfig.OPERA_DRIVER;
                 OperaOptions operaOptions = new OperaOptions();
                 operaOptions.setBinary(executable);
@@ -157,7 +167,7 @@ public class Go {
             default:
                 System.out.println("Unknown RUNTIME_DRIVER : "+ localRunConfig.RUNTIME_DRIVER);
                 driver.quit();
-                terminateWebDriver(localRunConfig, taskListExe, taskKillExe);
+                terminateWebDriver(localRunConfig, taskListExe, taskKillExe, exceptPidList);
                 System.exit(1);
                 break;
         }
@@ -204,7 +214,7 @@ public class Go {
             default:
                 System.out.println("Unknown RUNTIME_STAGE : "+ localRunConfig.RUNTIME_STAGE);
                 driver.quit();
-                terminateWebDriver(localRunConfig, taskListExe, taskKillExe);
+                terminateWebDriver(localRunConfig, taskListExe, taskKillExe, exceptPidList);
                 System.exit(1);
                 break;
         }
@@ -226,7 +236,7 @@ public class Go {
             Log.save(logFile, "Failed to check public IP");
             e.printStackTrace();
             driver.quit();
-            terminateWebDriver(localRunConfig, taskListExe, taskKillExe);
+            terminateWebDriver(localRunConfig, taskListExe, taskKillExe, exceptPidList);
             System.exit(1);
         }
 
@@ -263,14 +273,14 @@ public class Go {
                 Log.save(logFile, "Failed to send update notification");
                 e.printStackTrace();
                 driver.quit();
-                terminateWebDriver(localRunConfig, taskListExe, taskKillExe);
+                terminateWebDriver(localRunConfig, taskListExe, taskKillExe, exceptPidList);
                 System.exit(1);
             }
         }
 
         driver.quit();
 
-        terminateWebDriver(localRunConfig, taskListExe, taskKillExe);
+        terminateWebDriver(localRunConfig, taskListExe, taskKillExe, exceptPidList);
 
         LocalDateTime stopClock = LocalDateTime.now();
         Duration duration = Duration.between(startClock, stopClock);
@@ -517,73 +527,43 @@ public class Go {
         }
     }
 
-    static void terminateWebDriver(LocalRunConfig localRunConfig, String taskListExe, String taskKillExe){
+    static void terminateWebDriver(LocalRunConfig localRunConfig, String taskListExe, String taskKillExe, ArrayList<Integer> exceptPidList){
 
         switch (localRunConfig.RUNTIME_DRIVER) {
             case "ChromeDriver":
-                if (WinTask.find(taskListExe,"chromedriver.exe")){
-                    WinTask.kill(taskKillExe,"chromedriver.exe", true);
-                }
-                if (WinTask.find(taskListExe,"chrome.exe")){
-                    WinTask.kill(taskKillExe,"chrome.exe", true);
-                }
+                WinTask.kill(taskListExe, taskKillExe,"chromedriver.exe", exceptPidList);
+                WinTask.kill(taskListExe, taskKillExe,"chrome.exe", exceptPidList);
                 break;
             case "ChromeHeadlessDriver":
-                if (WinTask.find(taskListExe,"chromedriver.exe")){
-                    WinTask.kill(taskKillExe,"chromedriver.exe", true);
-                }
-                if (WinTask.find(taskListExe,"chrome.exe")){
-                    WinTask.kill(taskKillExe,"chrome.exe", true);
-                }
+                WinTask.kill(taskListExe, taskKillExe,"chromedriver.exe", exceptPidList);
+                WinTask.kill(taskListExe, taskKillExe,"chrome.exe", exceptPidList);
                 break;
             case "EdgeDriver":
-                if (WinTask.find(taskListExe,"microsoftwebdriver.exe")){
-                    WinTask.kill(taskKillExe,"microsoftwebdriver.exe", true);
-                }
-                if (WinTask.find(taskListExe,"microsoftedg*.exe")){
-                    WinTask.kill(taskKillExe,"microsoftedg*.exe", true);
-                }
+                WinTask.kill(taskListExe, taskKillExe,"microsoftwebdriver.exe", exceptPidList);
+                WinTask.kill(taskListExe, taskKillExe,"microsoftedg*.exe", exceptPidList);
                 break;
             case "FirefoxDriver":
-                if (WinTask.find(taskListExe,"geckodriver.exe")){
-                    WinTask.kill(taskKillExe,"geckodriver.exe", true);
-                }
-                if (WinTask.find(taskListExe,"firefox.exe")){
-                    WinTask.kill(taskKillExe,"firefox.exe", true);
-                }
+                WinTask.kill(taskListExe, taskKillExe,"geckodriver.exe", exceptPidList);
+                WinTask.kill(taskListExe, taskKillExe,"firefox.exe", exceptPidList);
                 break;
             case "FirefoxHeadlessDriver":
-                if (WinTask.find(taskListExe,"geckodriver.exe")){
-                    WinTask.kill(taskKillExe,"geckodriver.exe", true);
-                }
-                if (WinTask.find(taskListExe,"firefox.exe")){
-                    WinTask.kill(taskKillExe,"firefox.exe", true);
-                }
+                WinTask.kill(taskListExe, taskKillExe,"geckodriver.exe", exceptPidList);
+                WinTask.kill(taskListExe, taskKillExe,"firefox.exe", exceptPidList);
                 break;
             case "HtmlUnitDriver":
                 break;
             case "InternetExplorerDriver":
-                if (WinTask.find(taskListExe,"iedriverserver.exe")){
-                    WinTask.kill(taskKillExe,"iedriverserver.exe", true);
-                }
-                if (WinTask.find(taskListExe,"iexplore.exe")){
-                    WinTask.kill(taskKillExe,"iexplore.exe", true);
-                }
+                WinTask.kill(taskListExe, taskKillExe,"iedriverserver.exe", exceptPidList);
+                WinTask.kill(taskListExe, taskKillExe,"iexplore.exe", exceptPidList);
                 break;
             case "JBrowserDriver":
                 break;
             case "PhantomJSDriver":
-                if (WinTask.find(taskListExe,"phantomjs.exe")){
-                    WinTask.kill(taskKillExe,"phantomjs.exe", true);
-                }
+                WinTask.kill(taskListExe, taskKillExe,"phantomjs.exe", exceptPidList);
                 break;
             case "OperaDriver":
-                if (WinTask.find(taskListExe,"operadriver.exe")){
-                    WinTask.kill(taskKillExe,"operadriver.exe", true);
-                }
-                if (WinTask.find(taskListExe,"opera.exe")){
-                    WinTask.kill(taskKillExe,"opera.exe", true);
-                }
+                WinTask.kill(taskListExe, taskKillExe,"operadriver.exe", exceptPidList);
+                WinTask.kill(taskListExe, taskKillExe,"opera.exe", exceptPidList);
                 break;
             case "SafariDriver":
                 break;
