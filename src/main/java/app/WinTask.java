@@ -98,17 +98,17 @@ public class WinTask {
 
         System.out.println("Kill "+ pidList.size() +" process");
         for (int i = 0; i < pidList.size(); i += 1) {
-            WinTask.killPid(taskKillExe, imageName, pidList.get(i), true);
+            WinTask.killPid(taskKillExe, pidList.get(i), true);
         }
         System.out.println("Ignore "+ exceptPidList.size() +" preexistent process");
     }
 
-    static void killPid(String taskKillExe, String imageName, int pid, boolean force) {
+    static void killPid(String taskKillExe, int pid, boolean force) {
 
         try {
             Runtime run = Runtime.getRuntime();
-            String[] commandsForce = {"\""+ taskKillExe +"\"", "/f", "/pid "+ pid,"/im", "\"IMAGENAME eq "+ imageName +"\"", "/t"};
-            String[] commands = {"\""+ taskKillExe +"\"", "/pid "+ pid,"/im", "\"IMAGENAME eq "+ imageName +"\"", "/t"};
+            String[] commandsForce = {"\""+ taskKillExe +"\"", "/f", "/pid "+ pid, "/t"};
+            String[] commands = {"\""+ taskKillExe +"\"", "/pid "+ pid, "/t"};
 
             Process proc;
             if (force == true) {
@@ -116,7 +116,7 @@ public class WinTask {
             } else {
                 proc = run.exec(commands);
             }
-            System.out.println("    "+ imageName +" "+ pid);
+            System.out.println("    "+ pid);
 
             InputStream iStream = proc.getInputStream();
             InputStreamReader iStreamReader = new InputStreamReader(iStream);
@@ -138,6 +138,18 @@ public class WinTask {
             String errorLine;
             while ((errorLine = eBuffer.readLine()) != null) {
                 errorList.add(errorLine);
+            }
+
+            if (!statusList.isEmpty()) {
+                for(int i = 0; i < statusList.size(); i += 1) {
+                    System.out.println(statusList.get(i).toString());
+                }
+            }
+
+            if (!errorList.isEmpty()) {
+                for(int i = 0; i < errorList.size(); i += 1) {
+                    System.out.println(errorList.get(i).toString());
+                }
             }
 
         } catch (IOException ioe) {
