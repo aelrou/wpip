@@ -15,7 +15,7 @@ public class WinTask {
 
         try {
             Runtime run = Runtime.getRuntime();
-            String[] commands = {"\""+ taskListExe +"\"", "/fi", "\"IMAGENAME eq "+ imageName +"\""};
+            String[] commands = {"\""+ taskListExe +"\"", "/FI", "\"IMAGENAME eq "+ imageName +"\""};
             Process proc = run.exec(commands);
 
             InputStream iStream = proc.getInputStream();
@@ -110,8 +110,8 @@ public class WinTask {
 
         try {
             Runtime run = Runtime.getRuntime();
-            String[] commandsForce = {"\""+ taskKillExe +"\"", "/f", "/pid "+ pid, "/t"};
-            String[] commands = {"\""+ taskKillExe +"\"", "/pid "+ pid, "/t"};
+            String[] commandsForce = {"\""+ taskKillExe +"\"", "/F", "/FI", "PID eq "+ pid, "/T"};
+            String[] commands = {"\""+ taskKillExe +"\"", "/FI", "PID eq "+ pid, "/T"};
 
             Process proc;
             if (force == true) {

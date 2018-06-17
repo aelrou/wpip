@@ -5,8 +5,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.machinepublishers.jbrowserdriver.JBrowserDriver;
 import com.machinepublishers.jbrowserdriver.Settings;
 import com.machinepublishers.jbrowserdriver.Timezone;
@@ -36,35 +34,23 @@ public class Go {
 
     public static final String indent ="    ";
 
-    public static void main(String[] args) {
-        if (args == null || args.length == 0) {
-            System.out.println("Please specify the working directory where the JAR file is located.");
-            System.out.println("Example: \"java.exe\" -jar \"app.jar\" \"C:\\Working\\Directory\"");
-            System.exit(1);
-        }
+    public static void main(String[] args) throws WorkDirException, WrapJsonException {
 
-        if (args.length != 1) {
-            System.out.println("Only 1 parameter allowed. Found "+ args.length);
-            System.exit(1);
-        }
+        String workDir = new WorkDir(args,"app.jar").dir();
 
-        String workDir = args[0];
+        File localBinConfigFile = new WrapJson(workDir).findLocalBinConfig("LocalBinConfig.json");
+        LocalBinConfig localBinConfig = new WrapJson(workDir).readLocalBinConfig(localBinConfigFile);
 
-        findJarFile(workDir, "app.jar");
-
-        File localBinConfigFile = findLocalBinConfig(workDir,"LocalBinConfig.json");
-        LocalBinConfig localBinConfig = readLocalBinConfig(localBinConfigFile);
-
-        File localRunConfigFile = findLocalRunConfig(workDir,"LocalRunConfig.json");
-        LocalRunConfig localRunConfig = readLocalRunConfig(localRunConfigFile);
+        File localRunConfigFile = new WrapJson(workDir).findLocalRunConfig("LocalRunConfig.json");
+        LocalRunConfig localRunConfig = new WrapJson(workDir).readLocalRunConfig(localRunConfigFile);
 
         String logFile = Log.find(localRunConfig.LOGS_PATH, localRunConfig.LOG_NAME);
 
-        File localStageConfigFile = findLocalStageConfig(workDir,"LocalStageConfig.json");
-        LocalStageConfig localStageConfig = readLocalStageConfig(localStageConfigFile);
+        File localStageConfigFile = new WrapJson(workDir).findLocalStageConfig("LocalStageConfig.json");
+        LocalStageConfig localStageConfig = new WrapJson(workDir).readLocalStageConfig(localStageConfigFile);
 
-        File localStatusCacheFile = findLocalStatusCache(workDir, "LocalStatusCache.json");
-        LocalStatusCache localStatusCache = readLocalStatusCache(localStatusCacheFile);
+        File localStatusCacheFile = new WrapJson(workDir).findLocalStatusCache("LocalStatusCache.json");
+        LocalStatusCache localStatusCache = new WrapJson(workDir).readLocalStatusCache(localStatusCacheFile);
 
         String executable;
         ArrayList<Integer> exceptPidList = new ArrayList();
@@ -264,7 +250,7 @@ public class Go {
                 confirmMessage = WrapLocator.waitDisplay(driver, Loc.XPATH, ipNotifyConfirmXpath, 10);
                 confirmMessage.getText();
 
-                updateLocalStatusCache(localStatusCacheFile, currentIp);
+                new WrapJson(workDir).updateLocalStatusCache(localStatusCacheFile, currentIp);
 
             } catch (CustomExceptLocatorType | CustomExceptElementWait e) {
                 Log.save(logFile, "Failed to send update notification");
@@ -283,245 +269,6 @@ public class Go {
         Duration duration = Duration.between(startClock, stopClock);
         Log.save(logFile, "Process time "+ duration.getSeconds() +" sec");
 
-    }
-
-    static File findJarFile(String workDir, String fileName) {
-        File filePath = null;
-        try {
-            filePath = new File(workDir +"\\"+ fileName).getCanonicalFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (!filePath.exists()) {
-            System.out.println("Cannot find \""+ filePath.toString() +"\"");
-            System.out.println("Please ensure that the working directory is correct");
-            System.exit(1);
-        }
-        System.out.println("Found JAR \""+ filePath.toString() +"\"");
-        return filePath;
-    }
-
-    static File findLocalBinConfig(String workDir, String fileName) {
-        File filePath = null;
-        try {
-            filePath = new File(workDir +"\\"+ fileName).getCanonicalFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (!filePath.exists()) {
-            System.out.println("Cannot find \""+ filePath.toString() +"\"");
-            createLocalBinConfig(filePath);
-            System.exit(1);
-        }
-        System.out.println("Found JSON \""+ filePath.toString() +"\"");
-        return filePath;
-    }
-
-    static LocalBinConfig readLocalBinConfig(File file) {
-        LocalBinConfig localBinConfig = null;
-        try {
-            FileInputStream input = new FileInputStream(file);
-            Reader reader = new InputStreamReader(input, "US-ASCII");
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            localBinConfig = gson.fromJson(reader, LocalBinConfig.class);
-            reader.close();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return localBinConfig;
-    }
-
-    static void createLocalBinConfig(File file) {
-        try {
-//            System.out.println("Creating JSON template \""+ file.toString() +"\"");
-            System.out.println("Creating...");
-            FileWriter writer = new FileWriter(file, false);
-            BufferedWriter buffer = new BufferedWriter(writer);
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(new LocalBinConfig(true), buffer);
-            buffer.flush();
-            buffer.close();
-            System.out.println("Please examine \""+ file +"\" and update the relative paths as needed");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static File findLocalRunConfig(String workDir, String fileName) {
-        File filePath = null;
-        try {
-            filePath = new File(workDir +"\\"+ fileName).getCanonicalFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (!filePath.exists()) {
-            System.out.println("Cannot find \""+ filePath.toString() +"\"");
-            createLocalRunConfig(filePath);
-            System.exit(1);
-        }
-        System.out.println("Found JSON \""+ filePath.toString() +"\"");
-        return filePath;
-    }
-
-    static LocalRunConfig readLocalRunConfig(File file) {
-        LocalRunConfig localRunConfig = null;
-        try {
-            FileInputStream input = new FileInputStream(file);
-            Reader reader = new InputStreamReader(input, "US-ASCII");
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            localRunConfig = gson.fromJson(reader, LocalRunConfig.class);
-            reader.close();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return localRunConfig;
-    }
-
-    static void createLocalRunConfig(File file) {
-        try {
-//            System.out.println("Creating JSON template \""+ file.toString() +"\"");
-            System.out.println("Creating...");
-            FileWriter writer = new FileWriter(file, false);
-            BufferedWriter buffer = new BufferedWriter(writer);
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(new LocalRunConfig(true), buffer);
-            buffer.flush();
-            buffer.close();
-            System.out.println("Please examine \""+ file +"\" and update the selected driver as needed");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static File findLocalStageConfig(String workDir, String fileName) {
-        File filePath = null;
-        try {
-            filePath = new File(workDir +"\\"+ fileName).getCanonicalFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (!filePath.exists()) {
-            System.out.println("Cannot find \""+ filePath.toString() +"\"");
-            createLocalStageConfig(filePath);
-            System.exit(1);
-        }
-        System.out.println("Found JSON \""+ filePath.toString() +"\"");
-        return filePath;
-    }
-
-    static LocalStageConfig readLocalStageConfig(File file) {
-        LocalStageConfig localStageConfig = null;
-        try {
-            FileInputStream input = new FileInputStream(file);
-            Reader reader = new InputStreamReader(input, "US-ASCII");
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            localStageConfig = gson.fromJson(reader, LocalStageConfig.class);
-            reader.close();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return localStageConfig;
-    }
-
-    static void createLocalStageConfig(File file) {
-        try {
-//            System.out.println("Creating JSON template \""+ file.toString() +"\"");
-            System.out.println("Creating...");
-            FileWriter writer = new FileWriter(file, false);
-            BufferedWriter buffer = new BufferedWriter(writer);
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(new LocalStageConfig(true), buffer);
-            buffer.flush();
-            buffer.close();
-            System.out.println("Please examine \""+ file +"\" and update the stage parameters as needed");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static File findLocalStatusCache(String workDir, String fileName) {
-        File filePath = null;
-        try {
-            filePath = new File(workDir +"\\"+ fileName).getCanonicalFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (!filePath.exists()) {
-            System.out.println("Cannot find \""+ filePath.toString() +"\"");
-            createLocalStatusCache(filePath);
-            System.exit(1);
-        }
-        System.out.println("Found JSON \""+ filePath.toString() +"\"");
-        return filePath;
-    }
-
-    static LocalStatusCache readLocalStatusCache(File file) {
-        LocalStatusCache localStatusCache = null;
-        try {
-            FileInputStream input = new FileInputStream(file);
-            Reader reader = new InputStreamReader(input, "US-ASCII");
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            localStatusCache = gson.fromJson(reader, LocalStatusCache.class);
-            reader.close();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return localStatusCache;
-    }
-
-    static void createLocalStatusCache(File file) {
-        try {
-//            System.out.println("Creating JSON template \""+ file.toString() +"\"");
-            System.out.println("Creating...");
-            FileWriter writer = new FileWriter(file, false);
-            BufferedWriter buffer = new BufferedWriter(writer);
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(new LocalStatusCache(true), buffer);
-            buffer.flush();
-            buffer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static void updateLocalStatusCache(File file, String result) {
-        try {
-            FileWriter writer = new FileWriter(file, false);
-            BufferedWriter buffer = new BufferedWriter(writer);
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-            LocalStatusCache updateStatusCache = new LocalStatusCache(false);
-            updateStatusCache.IP_CACHE = result;
-            updateStatusCache.LAST_UPDATE = LocalDateTime.now();
-
-            gson.toJson((updateStatusCache), buffer);
-            buffer.flush();
-            buffer.close();
-            System.out.println("Updated JSON status cache \""+ file.toString() +"\"");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     static void terminateWebDriver(LocalRunConfig localRunConfig, String taskListExe, String taskKillExe, ArrayList<Integer> exceptPidList){

@@ -5,3 +5,4 @@ target
 *.json
 *.jar
 *.exe
+*.log
